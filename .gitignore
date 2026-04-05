@@ -1,0 +1,5 @@
+.zcompdump
+.zsh_history
+blocklist
+projects.txt
+*.env

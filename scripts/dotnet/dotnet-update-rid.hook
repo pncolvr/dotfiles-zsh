@@ -1,0 +1,11 @@
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Target = dotnet*
+
+[Action]
+Description = Updating RID on dotnet
+When = PostTransaction
+Exec = /home/pncolvr/Projects/scripts/dotnet/update-dotnet-rid

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+pwsh /home/pncolvr/Projects/scripts/dotnet/update-dotnet-endeavouros.ps1
