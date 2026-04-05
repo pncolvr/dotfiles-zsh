@@ -9,10 +9,12 @@ source "$env"
 function handle_akams () {
     local url="$*"
     if [[ "$url" == *"aka.ms"* ]]; then
-        url=$(curl -s -o /dev/null -w "%{url_effective}" -L "$url")
-        log "resolving to $url"
+        local redirect=$(curl -s -o /dev/null -w "%{url_effective}" -L "$url")
+        if [[ -n "$redirect" ]]; then
+            log "resolving to $redirect"
+            main "$redirect"
+        fi
     fi
-    echo -n "$url"
 }
 
 function check_blocked_and_open () {
@@ -75,10 +77,15 @@ function check_steam_and_open () {
         fi
     fi
 }
-params="$*"
-log "opening $params"
-url=$(handle_akams "$@")
-check_steam_and_open "$url"
-check_webapp_and_open "$url"
-check_blocked_and_open "$url"
-open_default_browser "$url"
+
+function main() {
+    check_steam_and_open "$@"
+    check_webapp_and_open "$@"
+    check_blocked_and_open "$@"
+    open_default_browser "$@"
+    exit
+}
+
+log "opening $*"
+handle_akams "$@"
+main "$@"
