@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 # source: https://www.reddit.com/r/linuxmint/comments/pyqc10/can_i_use_grsync_or_rsync_to_do_the_same_as
 # Backup using rsync to a different disk (/media/Backups):
 # Home

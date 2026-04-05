@@ -231,7 +231,7 @@ function backup-n8n() {
 }
 
 function backup() {
-  sudo "$SCRIPTS"/backups/host/create.sh backup
+  sudo ZDOTDIR="$ZDOTDIR" "$SCRIPTS"/backups/host/create.sh backup
 }
 
 function code-update-projects () {
