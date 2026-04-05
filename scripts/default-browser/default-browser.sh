@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
 # commented the browser env variable on /etc/environment
-SCRIPT_PATH=$(echo "${BASH_SOURCE[0]:-0}" | xargs realpath | xargs dirname)
+WORKSPACE=$(echo "${BASH_SOURCE[0]:-0}" | xargs realpath | xargs dirname)
+
+source $HOME/.config/rofi/scripts/_common/utils.sh
+
+function handle_akams () {
+    local url="$*"
+    if [[ "$url" == *"aka.ms"* ]]; then
+        url=$(curl -s -o /dev/null -w "%{url_effective}" -L "$url")
+        log "resolving to $url"
+    fi
+    echo -n "$url"
+}
 
 function check_blocked_and_open () {
     local args="$*"
-    if printf '%s' "$args" | grep -F -f "$SCRIPT_PATH/blocklist" -q; then
+    if printf '%s' "$args" | grep -F -f "$WORKSPACE/blocklist" -q; then
         open_blocked_browser "$@"
         exit
     fi
@@ -62,8 +73,10 @@ function check_steam_and_open () {
         fi
     fi
 }
-
-check_steam_and_open "$@"
-check_webapp_and_open "$@"
-check_blocked_and_open "$@"
-open_default_browser "$@"
+params="$*"
+log "opening $params"
+url=$(handle_akams "$@")
+check_steam_and_open "$url"
+check_webapp_and_open "$url"
+check_blocked_and_open "$url"
+open_default_browser "$url"
