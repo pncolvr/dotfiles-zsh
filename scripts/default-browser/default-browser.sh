@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # commented the browser env variable on /etc/environment
-WORKSPACE=$(echo "${BASH_SOURCE[0]:-0}" | xargs realpath | xargs dirname)
+WORKSPACE=$(dirname "${BASH_SOURCE[0]:-0}")
 
 source $HOME/.config/rofi/scripts/_common/utils.sh
+env=$(get_temp_file_named "${BASH_SOURCE[0]:-0}")
+source "$env"
 
 function handle_akams () {
     local url="$*"
@@ -25,7 +27,7 @@ function open_blocked_browser () {
     local url="$*"
     local args=("$@")
     if ! printf '%s' "$url" | grep -F -q -- '--profile-directory'; then
-        args+=(--profile-directory=lt)
+        args+=(--profile-directory="$VIVALDI_PROFILE_DIRECTORY")
     fi
     move_to_workspace 9 "$url"
     vivaldi "${args[@]}" > /dev/null 2>&1 & disown
