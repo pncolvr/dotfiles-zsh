@@ -39,18 +39,25 @@ function open_blocked_browser () {
 }
 
 function check_webapp_and_open () {
-    local url="$*"
+    local option="$1"
     shift 1
     local args=("$@")
-    if printf '%s' "$url" | grep -F -q -- 'qutebrowser-webapp'; then
-        qutebrowser --desktop-file-name qutebrowser-webapp \
-            --target window \
-            -C ~/.config/qutebrowser/config.py \
-            -B ~/.local/share/qutebrowser-webapp \
-            "${args[@]}" > /dev/null 2>&1 & disown
 
-        exit
-    fi
+    case $option in 
+        "qutebrowser-webapp"|"qutebrowser-twitch-chat") open_qutebrowser_with_profile "$option" "${args[@]}";;
+    esac
+}
+
+function open_qutebrowser_with_profile () {
+    local profile="$1"
+    shift 1
+    local args=("$@")
+    qutebrowser --desktop-file-name "$profile" \
+                --target window \
+                -C ~/.config/qutebrowser/config.py \
+                -B ~/.local/share/"$profile" \
+                "${args[@]}" > /dev/null 2>&1 & disown
+    exit
 }
 
 function open_default_browser () {
