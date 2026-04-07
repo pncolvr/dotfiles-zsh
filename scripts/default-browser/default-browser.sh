@@ -3,7 +3,8 @@
 WORKSPACE=$(dirname "${BASH_SOURCE[0]:-0}")
 
 source $HOME/.config/rofi/scripts/_common/utils.sh
-env=$(get_temp_file_named "${BASH_SOURCE[0]:-0}")
+env=$(get_env_file "${BASH_SOURCE[0]:-0}")
+
 source "$env"
 
 function handle_akams () {
@@ -29,6 +30,7 @@ function open_blocked_browser () {
     local url="$*"
     local args=("$@")
     if ! printf '%s' "$url" | grep -F -q -- '--profile-directory'; then
+        log "adding default profile directory $VIVALDI_PROFILE_DIRECTORY"
         args+=(--profile-directory="$VIVALDI_PROFILE_DIRECTORY")
     fi
     move_to_workspace 9 "$url"
