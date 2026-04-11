@@ -198,10 +198,9 @@ function sw() {
   "$HOME"/.config/hypr/scripts/wallpapers/picker.sh "$HOME"/Pictures/wallpapers/
 }
 
-# redo: use projects json
-# function uc() {
-#   exec-script "$SCRIPTS/utils/git/mytools-sync-git.sh"
-# }
+function uc() {
+  exec-script "$SCRIPTS/git/sync-projects.sh"
+}
 
 function update-gh-token() {
 	"$SCRIPTS"/dotnet/update-gh-token.sh "$1"
