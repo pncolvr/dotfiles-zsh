@@ -1,5 +1,7 @@
 autoload -Uz compinit
 zmodload zsh/complist
+autoload -U run-help
+
 if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
   compinit
 else
@@ -145,8 +147,16 @@ if command -v compdef >/dev/null 2>&1; then
     compdef _config_git config
 fi
 
+function ae () {
+  "$SCRIPTS"/files/rename/add-extension.sh
+}
+
 function s () {
 	kitty +kitten ssh "$@"
+}
+
+function sc () {
+  kcmshell6 kcm_sddm & disown
 }
 
 function cookie-jar () {
@@ -369,6 +379,7 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
 autoload -Uz vcs_info
 setopt prompt_subst
+setopt inc_append_history_time
 
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' check-for-changes false
