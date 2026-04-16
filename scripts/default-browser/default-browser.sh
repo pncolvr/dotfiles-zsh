@@ -42,10 +42,22 @@ function check_webapp_and_open () {
     local option="$1"
     shift 1
     local args=("$@")
+    if matches_pattern "$option" "${WEB_APPS[@]}"; then
+        open_qutebrowser_with_profile "$option" "${args[@]}"
+    elif matches_pattern "$option" "${LOCALHOST_WORK[@]}"; then
+        open_blocked_browser --app="$option" "${args[@]}"
+    elif matches_pattern "$option" "${LOCALHOST_PERSONAL[@]}"; then
+        open_qutebrowser_with_profile "$LOCALHOST_QB_PROFILE" "$option" "${args[@]}"
+    fi
+}
 
-    case $option in 
-        "qutebrowser-webapp"|"qutebrowser-twitch-chat") open_qutebrowser_with_profile "$option" "${args[@]}";;
-    esac
+function matches_pattern() {
+    local value="$1"
+    shift
+    for pattern in "$@"; do
+        [[ $value == $pattern ]] && return 0
+    done
+    return 1
 }
 
 function open_qutebrowser_with_profile () {
