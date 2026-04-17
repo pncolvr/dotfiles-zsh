@@ -5,7 +5,7 @@ using System.Globalization;
 if (!TryParseArguments(args, out var inputPath, out var selectedDate, out var argumentError))
 {
 	Console.Error.WriteLine(argumentError);
-	Console.Error.WriteLine("Usage: time-card.cs -f <events-file> [-d yyyy-MM-dd]");
+	Console.Error.WriteLine("Usage: timecard.cs -f <events-file> [-d yyyy-MM-dd]");
 	return 1;
 }
 

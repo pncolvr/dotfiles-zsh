@@ -128,11 +128,11 @@ alias azure-update-subs="/home/pncolvr/Projects/scripts/rofi/web/azure.sh --rebu
 # alias gtfo='git remote prune origin'
 
 function timecard() {
-  $ZDOTDIR/scripts/status/time-card.cs -- -f "$TIMETABLE_FILE" -d "$(date '+%Y-%m-%d')"
+  $ZDOTDIR/scripts/status/timecard.cs -- -f "$TIMETABLE_FILE" -d "$(date '+%Y-%m-%d')"
 }
 
 function timecard-all() {
-  $ZDOTDIR/scripts/status/time-card.cs -- -f "$TIMETABLE_FILE"
+  $ZDOTDIR/scripts/status/timecard.cs -- -f "$TIMETABLE_FILE"
 }
 
 function config() {
