@@ -21,21 +21,44 @@ function check_processes() {
     fi
 }
 
+function has_open_files_in_folder() {
+    lsof -u "$USER" 2>/dev/null | grep -q "$WORK_BASE_DIRECTORY"
+}
+
 function get_state() {
     local state=""
 
     if [[ -f "$STATE_FILE" ]]; then
         state=$(cat "$STATE_FILE")
-        echo "$state" 
-        return 0
+    else
+        state=$(calc_state_from_heuristics)
     fi
 
-    if check_processes; then
+    log_state "$state"
+    echo -n "$state"
+}
+
+function calc_state_from_heuristics() {
+    local state
+    if check_processes || has_open_files_in_folder; then
         state="$WORKING_STATE_NAME"
     else
         state="$NOTWORKING_STATE_NAME"
     fi
-    echo "$state"
+    echo -n "$state"
+}
+
+function log_state() {
+    local state="$1"
+    local timestamp=$(date +%s)
+    local last_date last_state
+    if [[ -f "$LOG_FILE" ]]; then
+        IFS=';' read -r last_date last_state < <(tail -n 1 "$LOG_FILE")
+        if [[ "$last_state" == "$state" ]]; then
+            return
+        fi
+    fi
+    echo "$timestamp;$state" >> "$LOG_FILE"
 }
 
 function set_state() {
