@@ -8,7 +8,7 @@ function check_processes() {
     local found=0
     
     for pattern in "${WORKING_PROCESSES[@]}"; do
-        if pgrep -u "$USER" -f "$pattern" > /dev/null; then
+        if pgrep -u "$USER" -x "$pattern" > /dev/null; then
             found=1
             break
         fi
@@ -35,7 +35,6 @@ function get_state() {
     else
         state="$NOTWORKING_STATE_NAME"
     fi
-
     echo "$state"
 }
 
@@ -64,7 +63,7 @@ function toggle() {
     fi
 }
 
-function source() {
+function get_source() {
     if [[ -f "$STATE_FILE" ]]; then
         echo manual
     else
@@ -104,7 +103,7 @@ case "$1" in
         toggle
         ;;
     --source)
-        source
+        get_source
         ;;
     --clear)
         clear_state
