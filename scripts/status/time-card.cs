@@ -237,14 +237,17 @@ void PrintReport(IReadOnlyList<TimeBlock> blocks, DateOnly? selectedDate)
 {
 	const string Work = "work";
 	const string Personal = "personal";
-	const string Offline = "personal (offline)";
 	const int LabelWidth = 18;
 	const int DurationWidth = 8;
 	const int TimeWidth = 8;
 	const int CategoryWidth = 18;
 	const int StatusWidth = 7;
 
-	var days = blocks
+	var visibleBlocks = blocks
+		.Where(static block => block.Category is Work or Personal)
+		.ToList();
+
+	var days = visibleBlocks
 		.GroupBy(static block => block.Start.ToLocalTime().Date)
 		.Where(group => selectedDate is null || DateOnly.FromDateTime(group.Key) == selectedDate.Value)
 		.OrderBy(static group => group.Key)
@@ -254,12 +257,10 @@ void PrintReport(IReadOnlyList<TimeBlock> blocks, DateOnly? selectedDate)
 	{
 		var work = day.Where(static block => block.Category == Work).Aggregate(TimeSpan.Zero, static (sum, block) => sum + block.Duration);
 		var personal = day.Where(static block => block.Category == Personal).Aggregate(TimeSpan.Zero, static (sum, block) => sum + block.Duration);
-		var offline = day.Where(static block => block.Category == Offline).Aggregate(TimeSpan.Zero, static (sum, block) => sum + block.Duration);
 
 		Console.WriteLine(day.Key.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
 		Console.WriteLine($"  {Work,-LabelWidth} {FormatDuration(work),DurationWidth}");
 		Console.WriteLine($"  {Personal,-LabelWidth} {FormatDuration(personal),DurationWidth}");
-		Console.WriteLine($"  {Offline,-LabelWidth} {FormatDuration(offline),DurationWidth}");
 		Console.WriteLine("  blocks:");
 		Console.WriteLine($"    {"start",-TimeWidth} {"end",-TimeWidth} {"category",-CategoryWidth} {"duration",DurationWidth} {"status",-StatusWidth}");
 
