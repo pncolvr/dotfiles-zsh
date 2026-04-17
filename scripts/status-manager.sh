@@ -68,7 +68,7 @@ function set_state() {
         echo "Error: Invalid state provided. Must be '$WORKING_STATE_NAME' or '$NOTWORKING_STATE_NAME'."
         return 1
     fi
-
+    log_state "$desired_state"
     echo "$desired_state" > "$STATE_FILE"
 }
 
@@ -76,6 +76,7 @@ function clear_state() {
     if [[ -f "$STATE_FILE" ]]; then
         rm -f "$STATE_FILE"
     fi
+    log_state $(get_state)
 }
 
 function toggle() {
@@ -100,6 +101,7 @@ function usage () {
     echo "Commands:"
     echo "  $0 --check               Check the current state."
     echo "  $0 --set [$WORKING_STATE_NAME|$NOTWORKING_STATE_NAME] Manually set the state."
+    echo "  $0 --log-system-event    Logs a system event (eg: startup or shutdown)."
     echo "  $0 --toggle              Toggles the state, considered manually set."
     echo "  $0 --source              Returns either manual or automatic."
     echo "  $0 --clear               Clear the manual state override."
@@ -121,6 +123,13 @@ case "$1" in
             exit 1
         fi
         set_state "$2"
+        ;;
+    --log-system-event)
+        if [[ $# -ne 2 ]]; then
+            echo "Error: --log-system-event requires an event (eg: startup or shutdown)."
+            exit 1
+        fi
+        log_state "$2"
         ;;
     --toggle)
         toggle
