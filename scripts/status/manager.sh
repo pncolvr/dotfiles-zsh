@@ -62,10 +62,21 @@ function log_state() {
     local state="$1"
     local timestamp=$(date +%s)
     local last_date last_state
-    if [[ "$(get_last_state)" != "$state" ]]; then
-        hyprctl notify -1 1500 "rgb(6272a4)" "$state mode"
+    if [[ "$(get_last_state)" != "$state" ]] && ! is_hyprlock_running; then
+        if [[ "$state" =~ ^("$WORKING_STATE_NAME"|"$NOTWORKING_STATE_NAME")$ ]]; then
+            hyprctl notify -1 1500 "rgb(6272a4)" "$state mode"
+        fi
         echo "$timestamp;$state" >> "$LOG_FILE"
     fi
+}
+
+# when locking the screen
+# hyprland sends screencast followed by windowactive events
+# this messed up the detection logic
+# so, for now, we are ignoring events 
+# while hyprlock is running
+function is_hyprlock_running() {
+    pgrep -u "$USER" -x hyprlock
 }
 
 function get_last_state() {
@@ -80,16 +91,13 @@ function get_last_state() {
 
 function set_state() {
     local desired_state="$1"
-    case $desired_state in
-        "$WORKING_STATE_NAME"|"$NOTWORKING_STATE_NAME")
-            log_state "$desired_state"
-            echo "$desired_state" > "$STATE_FILE"
-            ;;
-        *)
-            echo "Error: Invalid state provided. Must be '$WORKING_STATE_NAME' or '$NOTWORKING_STATE_NAME'."
-            return 1
-            ;;
-    esac
+
+    if [[ "$desired_state" =~ ^("$WORKING_STATE_NAME"|"$NOTWORKING_STATE_NAME")$ ]]; then
+        log_state "$desired_state"
+        echo "$desired_state" > "$STATE_FILE"  
+    else 
+        echo "Error: Invalid state provided. Must be '$WORKING_STATE_NAME' or '$NOTWORKING_STATE_NAME'."
+    fi
 }
 
 function clear_state() {
@@ -121,7 +129,7 @@ function usage () {
     echo "Commands:"
     echo "  $0 --check               Check the current state."
     echo "  $0 --set [$WORKING_STATE_NAME|$NOTWORKING_STATE_NAME] Manually set the state."
-    echo "  $0 --log-system-event    Logs a system event (eg: startup or shutdown)."
+    echo "  $0 --log-system-event    Logs a system event (eg: active or inactive)."
     echo "  $0 --toggle              Toggles the state, considered manually set."
     echo "  $0 --source              Returns either manual or automatic."
     echo "  $0 --clear               Clear the manual state override."

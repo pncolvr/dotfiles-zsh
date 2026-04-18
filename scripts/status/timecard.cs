@@ -30,8 +30,8 @@ catch (FormatException exception)
 
 const string Work = "work";
 const string Personal = "personal";
-const string Startup = "startup";
-const string Shutdown = "shutdown";
+const string Startup = "active";
+const string Shutdown = "inactive";
 const string Offline = "personal (offline)";
 
 var reportEnd = DateTimeOffset.Now;
@@ -161,7 +161,7 @@ string NormalizeKind(string rawKind, int lineNumber)
 		Personal => Personal,
 		Startup => Startup,
 		Shutdown => Shutdown,
-		_ => throw new FormatException($"Invalid event at line {lineNumber}: '{rawKind}'. Allowed values: work, personal, startup, shutdown")
+		_ => throw new FormatException($"Invalid event at line {lineNumber}: '{rawKind}'. Allowed values: work, personal, active, inactive")
 	};
 }
 
