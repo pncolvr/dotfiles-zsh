@@ -4,6 +4,16 @@ source "$ZDOTDIR"/scripts/_common.sh
 env=$(get_env_file "${BASH_SOURCE[0]:-0}")
 source $env
 
+# Create a manager.env with your options, this is a sample:
+# STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/work_state_status_${USER}"
+# LOG_FILE="$HOME/Documents/timetable.csv"
+# WORKING_STATE_NAME="work"
+# NOTWORKING_STATE_NAME="personal"
+# WORK_BASE_DIRECTORY=$HOME/Projects/work
+# WORKING_PROCESSES=(
+# )
+
+
 function check_processes() {
     local found=0
     
@@ -52,24 +62,34 @@ function log_state() {
     local state="$1"
     local timestamp=$(date +%s)
     local last_date last_state
+    if [[ "$(get_last_state)" != "$state" ]]; then
+        hyprctl notify -1 1500 "rgb(6272a4)" "$state mode"
+        echo "$timestamp;$state" >> "$LOG_FILE"
+    fi
+}
+
+function get_last_state() {
+    local last_date last_state
     if [[ -f "$LOG_FILE" ]]; then
         IFS=';' read -r last_date last_state < <(tail -n 1 "$LOG_FILE")
-        if [[ "$last_state" == "$state" ]]; then
-            return
-        fi
+    else
+        last_state="unknown"
     fi
-    echo "$timestamp;$state" >> "$LOG_FILE"
+    echo -n "$last_state"
 }
 
 function set_state() {
     local desired_state="$1"
-
-    if [[ "$desired_state" != "$WORKING_STATE_NAME" && "$desired_state" != "$NOTWORKING_STATE_NAME" ]]; then
-        echo "Error: Invalid state provided. Must be '$WORKING_STATE_NAME' or '$NOTWORKING_STATE_NAME'."
-        return 1
-    fi
-    log_state "$desired_state"
-    echo "$desired_state" > "$STATE_FILE"
+    case $desired_state in
+        "$WORKING_STATE_NAME"|"$NOTWORKING_STATE_NAME")
+            log_state "$desired_state"
+            echo "$desired_state" > "$STATE_FILE"
+            ;;
+        *)
+            echo "Error: Invalid state provided. Must be '$WORKING_STATE_NAME' or '$NOTWORKING_STATE_NAME'."
+            return 1
+            ;;
+    esac
 }
 
 function clear_state() {
