@@ -1,11 +1,12 @@
 #!/usr/bin/dotnet
 
 using System.Globalization;
+using System.Linq.Expressions;
 
-if (!TryParseArguments(args, out var inputPath, out var selectedDate, out var argumentError))
+if (!TryParseArguments(args, out var inputPath, out var selectedDate, out var brief, out var argumentError))
 {
 	Console.Error.WriteLine(argumentError);
-	Console.Error.WriteLine("Usage: timecard.cs -f <events-file> [-d yyyy-MM-dd]");
+	Console.Error.WriteLine("Usage: timecard.cs -f <events-file> [-d yyyy-MM-dd] [-b]");
 	return 1;
 }
 
@@ -26,6 +27,7 @@ catch (FormatException exception)
 	Console.Error.WriteLine(exception.Message);
 	return 1;
 }
+
 const string Work = "work";
 const string Personal = "personal";
 const string Startup = "startup";
@@ -34,15 +36,20 @@ const string Offline = "personal (offline)";
 
 var reportEnd = DateTimeOffset.Now;
 var blocks = BuildBlocks(events, reportEnd);
-PrintReport(blocks, selectedDate);
+if (brief && selectedDate.HasValue)
+{
+	PrintBriefReport(blocks, selectedDate!.Value);
+} else {
+	PrintReport(blocks, selectedDate, brief);
+}
 return 0;
 
-bool TryParseArguments(string[] values, out string filePath, out DateOnly? date, out string? error)
+bool TryParseArguments(string[] values, out string filePath, out DateOnly? date, out bool brief, out string? error)
 {
 	filePath = string.Empty;
 	date = null;
 	error = null;
-
+	brief = false;
 	for (var index = 0; index < values.Length; index++)
 	{
 		var argument = values[index];
@@ -73,7 +80,10 @@ bool TryParseArguments(string[] values, out string filePath, out DateOnly? date,
 
 				date = selectedDate;
 				break;
-
+			case "-b":
+			case "--brief":
+				brief = true;
+				break;
 			default:
 				error = $"Unknown argument: {argument}";
 				return false;
@@ -233,7 +243,7 @@ void AddSplitBlocks(List<TimeBlock> blocks, string category, DateTimeOffset star
 	}
 }
 
-void PrintReport(IReadOnlyList<TimeBlock> blocks, DateOnly? selectedDate)
+void PrintReport(IReadOnlyList<TimeBlock> blocks, DateOnly? selectedDate, bool brief)
 {
 	const string Work = "work";
 	const string Personal = "personal";
@@ -261,6 +271,8 @@ void PrintReport(IReadOnlyList<TimeBlock> blocks, DateOnly? selectedDate)
 		Console.WriteLine(day.Key.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
 		Console.WriteLine($"  {Work,-LabelWidth} {FormatDuration(work),DurationWidth}");
 		Console.WriteLine($"  {Personal,-LabelWidth} {FormatDuration(personal),DurationWidth}");
+		
+		if (brief) continue;
 		Console.WriteLine("  blocks:");
 		Console.WriteLine($"    {"start",-TimeWidth} {"end",-TimeWidth} {"category",-CategoryWidth} {"duration",DurationWidth} {"status",-StatusWidth}");
 
@@ -281,6 +293,36 @@ void PrintReport(IReadOnlyList<TimeBlock> blocks, DateOnly? selectedDate)
 	{
 		Console.WriteLine("No completed time blocks found.");
 	}
+}
+
+void PrintBriefReport(IReadOnlyList<TimeBlock> blocks, DateOnly selectedDate)
+{
+	const string Work = "work";
+	const string Personal = "personal";
+	const int LabelWidth = 8;
+	const int DurationWidth = 8;
+
+	var visibleBlocks = blocks
+		.Where(static block => block.Category is Work or Personal)
+		.ToList();
+
+	var day = visibleBlocks
+		.GroupBy(static block => block.Start.ToLocalTime().Date)
+		.Where(group => DateOnly.FromDateTime(group.Key) == selectedDate)
+		.OrderBy(static group => group.Key)
+		.First();
+	
+	if (day is null)
+	{
+		Console.WriteLine("No completed time blocks found.");
+		return;
+	}
+
+	var work = day.Where(static block => block.Category == Work).Aggregate(TimeSpan.Zero, static (sum, block) => sum + block.Duration);
+	var personal = day.Where(static block => block.Category == Personal).Aggregate(TimeSpan.Zero, static (sum, block) => sum + block.Duration);
+
+	Console.WriteLine($"{Work,-LabelWidth} {FormatDuration(work),DurationWidth}");
+	Console.Write($"{Personal,-LabelWidth} {FormatDuration(personal),DurationWidth}");
 }
 
 string FormatDuration(TimeSpan duration)
