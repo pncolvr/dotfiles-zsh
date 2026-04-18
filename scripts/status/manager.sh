@@ -15,20 +15,12 @@ source $env
 
 
 function check_processes() {
-    local found=0
-    
     for pattern in "${WORKING_PROCESSES[@]}"; do
         if pgrep -u "$USER" -x "$pattern" > /dev/null; then
-            found=1
-            break
+            return 0
         fi
     done
-
-    if [[ $found -eq 1 ]]; then
-        return 0
-    else
-        return 1
-    fi
+    return 1
 }
 
 function has_open_files_in_folder() {
