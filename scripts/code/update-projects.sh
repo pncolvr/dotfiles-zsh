@@ -272,6 +272,43 @@ function  process_projects_sequential() {
     fi
 }
 
+function filter_workspaces() {
+    local json="$1"
+
+    local workspace_list
+    workspace_list=$(echo "$json" | jq -r '.[] | .name as $proj | .workspaces[] | "\($proj) > \(.name)\t\(.path)"')
+
+    if [[ -z "$workspace_list" ]]; then
+        debug_log "No workspaces found, skipping filter"
+        echo "$json"
+        return
+    fi
+
+    local fzf_output
+    fzf_output=$(printf '%s\n' "$workspace_list" | \
+        fzf --multi \
+            --bind 'start:select-all' \
+            --bind 'ctrl-a:toggle-all' \
+            --delimiter=$'\t' \
+            --with-nth=1 \
+            --header=$'Tab/Shift-Tab: toggle & move  Ctrl-A: toggle all  Enter: confirm  Esc: keep all\nDeselect workspaces to omit:' \
+            --prompt='Workspaces to keep> ')
+
+    local fzf_exit=$?
+
+    if [[ $fzf_exit -eq 130 ]]; then
+        debug_log "fzf cancelled, keeping all workspaces"
+        echo "$json"
+        return
+    fi
+
+    local paths_json
+    paths_json=$(printf '%s\n' "$fzf_output" | awk -F'\t' '{print $2}' | jq -R -s 'split("\n") | map(select(length > 0))')
+
+    echo "$json" | jq --argjson paths "$paths_json" \
+        '[.[] | .workspaces = [.workspaces[] | select(.path | IN($paths[]))]]'
+}
+
 function main() {
     debug_log "Script start. ProjectsRoot='$PROJECTS_ROOT'; AdditionalProjectsFile='$ADDITIONAL_PROJECTS_FILE'; DestinationJson='$DESTINATION_JSON'"
     
@@ -306,7 +343,9 @@ function main() {
     else
         final_json=$(process_projects_sequential)
     fi
-    
+
+    final_json=$(filter_workspaces "$final_json")
+
     echo "$final_json" > "$DESTINATION_JSON" || {
         print_error_message "Failed to write JSON to: $DESTINATION_JSON"
         exit 1
