@@ -4,6 +4,11 @@ source "$ZDOTDIR"/scripts/_common.sh
 env=$(get_env_file "${BASH_SOURCE[0]:-0}")
 source $env
 
+# https://man7.org/linux/man-pages/man1/flock.1.html
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/status-manager.lock"
+exec 9>"$LOCK_FILE"
+flock -x 9
+
 # Create a manager.env with your options, this is a sample:
 # STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/work_state_status_${USER}"
 # LOG_FILE="$HOME/Documents/timetable.csv"
@@ -36,7 +41,7 @@ function get_state() {
         state=$(calc_state_from_heuristics)
     fi
 
-    log_state "$state"
+    log_state "$state" > /dev/null 2>&1
     echo -n "$state"
 }
 
@@ -56,7 +61,7 @@ function log_state() {
     local last_date last_state
     if [[ "$(get_last_state)" != "$state" ]] && ! is_hyprlock_running; then
         if [[ "$state" =~ ^("$WORKING_STATE_NAME"|"$NOTWORKING_STATE_NAME")$ ]]; then
-            hyprctl notify -1 1500 "rgb(6272a4)" "$state mode"
+            hyprctl notify -1 1500 "rgb(6272a4)" "$state mode" > /dev/null 2>&1
         fi
         echo "$timestamp;$state" >> "$LOG_FILE"
     fi
@@ -96,7 +101,7 @@ function clear_state() {
     if [[ -f "$STATE_FILE" ]]; then
         rm -f "$STATE_FILE"
     fi
-    log_state $(get_state)
+    get_state > /dev/null
 }
 
 function toggle() {
