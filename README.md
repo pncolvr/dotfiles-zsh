@@ -14,6 +14,12 @@ I also have .zshrc file, which is a symbolic link that points to
 ```
 $ZDOTDIR/.zshrc
 ```
+
+The file based app was published with the commands:
+```bash
+cd scripts/status
+dotnet publish ./timecard.cs --output ./bin
+```
 # Relevant Commands
 I use this repo as a git submodule on my dotfiles.  
 The following command is isued on the dotfiles repo, to have this one as a submodule.
