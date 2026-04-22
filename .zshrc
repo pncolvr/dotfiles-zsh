@@ -163,9 +163,12 @@ function s () {
 	kitty +kitten ssh "$@"
 }
 
-function sc () {
-  kcmshell6 kcm_sddm & disown
-}
+# requires sddm-kcm
+# requires a lot of packages
+# proceed with caution
+# function sc () {
+#   kcmshell6 kcm_sddm & disown
+# }
 
 function cookie-jar () {
   "$HOME"/.config/qutebrowser/scripts/cookie-cleaner.sh
@@ -253,6 +256,10 @@ function backup() {
 
 function code-update-projects () {
   $SCRIPTS/code/update-projects.sh
+}
+
+function update-grub () {
+  sudo $SCRIPTS/grub/update.sh "$@"
 }
 
 function g () {
