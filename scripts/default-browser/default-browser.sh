@@ -7,14 +7,18 @@ env=$(get_env_file "${BASH_SOURCE[0]:-0}")
 
 source "$env"
 
-function handle_akams () {
+function handle_ms_hiding_links () {
     local url="$*"
+    local new
     if [[ "$url" == *"aka.ms"* ]]; then
-        local redirect=$(curl -s -o /dev/null -w "%{url_effective}" -L "$url")
-        if [[ -n "$redirect" ]]; then
-            log "resolving to $redirect"
-            main "$redirect"
-        fi
+        new=$(curl -s -o /dev/null -w "%{url_effective}" -L "$url")
+    elif [[ "$url" == *"statics.teams.cdn.office.net"* ]] ;then
+        new=$(printf '%b\n' "$(echo "$url" | sed -n 's/.*[?&]url=\([^&]*\).*/\1/p' | sed 's/%/\\x/g')")
+    fi
+
+    if [[ -n "$new" ]]; then
+        log "resolving to $new"
+        main "$new"
     fi
 }
 
@@ -45,7 +49,7 @@ function check_webapp_and_open () {
     if matches_pattern "$option" "${WEB_APPS[@]}"; then
         open_qutebrowser_with_profile "$option" "${args[@]}"
     elif matches_pattern "$option" "${LOCALHOST_WORK[@]}"; then
-        open_blocked_browser --app="$option" "${args[@]}"
+        open_blocked_browser "$option" "${args[@]}"
     elif matches_pattern "$option" "${LOCALHOST_PERSONAL[@]}"; then
         open_qutebrowser_with_profile "$LOCALHOST_QB_PROFILE" "$option" "${args[@]}"
     fi
@@ -108,5 +112,5 @@ function main() {
 }
 
 log "opening $*"
-handle_akams "$@"
+handle_ms_hiding_links "$@"
 main "$@"
