@@ -159,9 +159,6 @@ function ae () {
   "$SCRIPTS"/files/rename/add-extension.sh
 }
 
-function s () {
-	kitty +kitten ssh "$@"
-}
 
 # requires sddm-kcm
 # requires a lot of packages
