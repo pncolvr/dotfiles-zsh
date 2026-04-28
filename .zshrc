@@ -211,11 +211,6 @@ function zip-with-password () {
   7z a -tzip -p"$1" -mem=AES256 "$1"
 }
 
-# TODO: refactor so we can have several folders
-function sw() {
-  "$HOME"/.config/hypr/scripts/wallpapers/picker.sh "$HOME"/Pictures/wallpapers/
-}
-
 function uc() {
   exec-script "$SCRIPTS/git/sync-projects.sh"
 }

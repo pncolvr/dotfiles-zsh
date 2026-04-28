@@ -93,7 +93,7 @@ function move_to_workspace () {
 
 function check_steam_and_open () {
     local args="$*"
-    if printf '%s' "$args" | grep -E '(store\.steampowered)' -q; then
+    if pgrep -u "$USER" -x "steam" > /dev/null && printf '%s' "$args" | grep -E '(store\.steampowered)' -q; then
         appid=$(echo "$args" | grep -oP '(?<=/app/)[0-9]+')
         if [ -n "$appid" ]; then
             hyprctl dispatch workspace 5 > /dev/null 2>&1
