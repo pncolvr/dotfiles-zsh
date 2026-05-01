@@ -140,8 +140,9 @@ fi
 
 case "$1" in
     --check)
-        get_state
-        ;;
+        get_state;;
+    --get)
+        get_last_state;;
     --set)
         if [[ $# -ne 2 ]]; then
             echo "Error: --set requires a state ($WORKING_STATE_NAME or $NOTWORKING_STATE_NAME)."
