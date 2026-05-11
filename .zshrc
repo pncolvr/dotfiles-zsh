@@ -207,6 +207,94 @@ function smaller () {
   echo "Conversion complete: $OUTPUT"
 }
 
+function smaller_av1 () {
+  if [ -z "$1" ]; then
+    echo "Usage: $0 <input_file>"
+    exit 1
+  fi
+
+  INPUT="$1"
+  BASENAME=$(basename "$INPUT")
+  NAME="${BASENAME%.*}"
+
+  echo "Choose output resolution [default: 2]:"
+  echo "1) 720p"
+  echo "2) 1080p"
+  
+  local RES_CHOICE
+  read -r "RES_CHOICE?Enter 1 or 2: " < /dev/tty
+  RES_CHOICE=${RES_CHOICE:-2}
+
+  if [ "$RES_CHOICE" = "1" ]; then
+    HEIGHT=720
+  elif [ "$RES_CHOICE" = "2" ]; then
+    HEIGHT=1080
+  else
+    echo "Invalid choice. Exiting."
+    exit 1
+  fi
+
+  OUTPUT="${NAME}_${HEIGHT}p30.mp4"
+
+  ffmpeg -i "$INPUT" \
+  -vf "scale=-2:${HEIGHT},fps=30" \
+  -c:v av1_nvenc \
+  -preset p5 \
+  -cq 35 -b:v 0 \
+  -c:a aac -b:a 64k \
+  -movflags +faststart \
+  "$OUTPUT"
+
+
+  echo "Conversion complete: $OUTPUT"
+}
+
+function smaller_265 () {
+  if [ -z "$1" ]; then
+    echo "Usage: $0 <input_file>"
+    exit 1
+  fi
+
+  INPUT="$1"
+  BASENAME=$(basename "$INPUT")
+  NAME="${BASENAME%.*}"
+
+  echo "Choose output resolution [default: 2]:"
+  echo "1) 720p"
+  echo "2) 1080p"
+  
+  local RES_CHOICE
+  read -r "RES_CHOICE?Enter 1 or 2: " < /dev/tty
+  RES_CHOICE=${RES_CHOICE:-2}
+
+  if [ "$RES_CHOICE" = "1" ]; then
+    HEIGHT=720
+  elif [ "$RES_CHOICE" = "2" ]; then
+    HEIGHT=1080
+  else
+    echo "Invalid choice. Exiting."
+    exit 1
+  fi
+
+  OUTPUT="${NAME}_${HEIGHT}p24.mp4"
+
+  ffmpeg -i "$INPUT" \
+  -vf "scale=-2:${HEIGHT},fps=24" \
+  -c:v hevc_nvenc \
+  -preset p5 \
+  -cq 34 -b:v 0 \
+  -af "volume=2.0" \
+  -c:a aac -b:a 64k \
+  -movflags +faststart \
+  "$OUTPUT"
+
+
+  echo "Conversion complete: $OUTPUT"
+}
+
+
+
+
 function zip-with-password () {
   7z a -tzip -p"$1" -mem=AES256 "$1"
 }
