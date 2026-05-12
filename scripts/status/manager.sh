@@ -55,14 +55,17 @@ function calc_state_from_heuristics() {
     echo -n "$state"
 }
 
+function notify() {
+    local status="$1"
+    hyprctl notify -1 1500 "rgb(6272a4)" "$status mode" > /dev/null 2>&1
+}
+
 function log_state() {
     local state="$1"
     local timestamp=$(date +%s)
     local last_date last_state
     if [[ "$(get_last_state)" != "$state" ]] && ! is_hyprlock_running; then
-        if [[ "$state" =~ ^("$WORKING_STATE_NAME"|"$NOTWORKING_STATE_NAME")$ ]]; then
-            hyprctl notify -1 1500 "rgb(6272a4)" "$state mode" > /dev/null 2>&1
-        fi
+        notify "$state"
         echo "$timestamp;$state" >> "$LOG_FILE"
     fi
 }

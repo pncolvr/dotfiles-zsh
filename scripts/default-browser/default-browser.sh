@@ -87,7 +87,7 @@ function move_to_workspace () {
     local workspace=$1
     local url=$2
     if [[ ! "$url" == *--app* ]]; then # only change workspace if not webapp
-        hyprctl dispatch workspace "$workspace" > /dev/null 2>&1
+        hyprctl dispatch 'hl.dsp.focus({ workspace = '$workspace'})' > /dev/null 2>&1
     fi
 }
 
@@ -96,7 +96,7 @@ function check_steam_and_open () {
     if pgrep -u "$USER" -x "steam" > /dev/null && printf '%s' "$args" | grep -E '(store\.steampowered)' -q; then
         appid=$(echo "$args" | grep -oP '(?<=/app/)[0-9]+')
         if [ -n "$appid" ]; then
-            hyprctl dispatch workspace 5 > /dev/null 2>&1
+            hyprctl dispatch 'hl.dsp.focus({ workspace = 5})' > /dev/null 2>&1
             steam "steam://store/$appid" & disown
             exit
         fi
