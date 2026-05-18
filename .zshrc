@@ -78,8 +78,12 @@ NAS_FOLDER='/mnt/hephaestus'
 SCRIPTS="$ZDOTDIR/scripts"
 HEPHAESTUS_IP='192.168.1.3'
 
-alias ls="eza -l --group-directories-first --time-style=long-iso --git --no-permissions --no-user"
-alias ll='\ls -la'
+alias ls='ls --human-readable --color=always --group-directories-first --time-style="+%Y-%m-%d %H:%M:%S"'
+alias ll='ls -la'
+alias rm='rm -I --preserve-root'
+alias cp='cp -i'
+alias mv='mv -i'
+alias mkdir='mkdir -p'
 
 alias extract='eval $SCRIPTS/archives/extract.sh'
 alias archive='eval $SCRIPTS/archives/create.sh -t'
