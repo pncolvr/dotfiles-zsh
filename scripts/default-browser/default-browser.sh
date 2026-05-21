@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # commented the browser env variable on /etc/environment
 WORKSPACE=$(dirname "${BASH_SOURCE[0]:-0}")
-
-source $HOME/.config/rofi/scripts/_common/utils.sh
+source "$ZDOTDIR"/scripts/_common.sh
 env=$(get_env_file "${BASH_SOURCE[0]:-0}")
 
 source "$env"

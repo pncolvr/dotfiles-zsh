@@ -46,3 +46,28 @@ function check_inside_git() {
         exit 1
     fi
 }
+
+function log() {
+    _internal_log 7 "$@"
+}
+
+function log_error() {
+    _internal_log 4 "$@"
+}
+
+function _internal_log() {
+    local priority
+    local emitError
+    priority=$1
+    shift
+    if [ -n "$1" ]; then
+        IN="$1"
+    else
+        read IN
+    fi
+    case $priority in
+        1|2|3|4) emitError="--stderr";;
+        5|6|7) emitError="";;
+    esac
+    logger "$emitError" --priority "$priority" --tag $(basename "${BASH_SOURCE[0]:-0}") $IN
+}

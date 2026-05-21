@@ -5,9 +5,9 @@ env=$(get_env_file "${BASH_SOURCE[0]:-0}")
 source $env
 
 # https://man7.org/linux/man-pages/man1/flock.1.html
-LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/status-manager.lock"
-exec 9>"$LOCK_FILE"
-flock -x 9
+# LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/status-manager.lock"
+# exec 9>"$LOCK_FILE"
+# flock -x 9
 
 # Create a manager.env with your options, this is a sample:
 # STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/work_state_status_${USER}"
