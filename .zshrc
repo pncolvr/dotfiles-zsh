@@ -69,7 +69,6 @@ zstyle ':completion:*:*:cd:*' list-colors 'di=37:fi=37:ma=30;47'
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/.zcompcache"
 
-
 export EDITOR='nvim'
 export VISUAL='nvim'
 export FILE_BROWSER='pcmanfm-qt'
@@ -162,7 +161,6 @@ fi
 function ae () {
   "$SCRIPTS"/files/rename/add-extension.sh
 }
-
 
 # requires sddm-kcm
 # requires a lot of packages
@@ -295,9 +293,6 @@ function smaller_265 () {
 
   echo "Conversion complete: $OUTPUT"
 }
-
-
-
 
 function zip-with-password () {
   7z a -tzip -p"$1" -mem=AES256 "$1"
