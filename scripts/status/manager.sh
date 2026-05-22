@@ -9,11 +9,13 @@ source $env
 # exec 9>"$LOCK_FILE"
 # flock -x 9
 
+WORKING_STATE_NAME="work"
+NOTWORKING_STATE_NAME="personal"
+
 # Create a manager.env with your options, this is a sample:
 # STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/work_state_status_${USER}"
 # LOG_FILE="$HOME/Documents/timetable.csv"
-# WORKING_STATE_NAME="work"
-# NOTWORKING_STATE_NAME="personal"
+
 # WORK_BASE_DIRECTORY=$HOME/Projects/work
 # WORKING_PROCESSES=(
 # )
@@ -60,12 +62,18 @@ function notify() {
     hyprctl notify -1 1500 "rgb(6272a4)" "$status mode" > /dev/null 2>&1
 }
 
+function change_wallpaper() {
+    local mode="$1"
+    "$HOME"/.config/hypr/scripts/wallpapers/default.sh "$mode"
+}
+
 function log_state() {
     local state="$1"
     local timestamp=$(date +%s)
     local last_date last_state
     if [[ "$(get_last_state)" != "$state" ]] && ! is_hyprlock_running; then
         notify "$state"
+        change_wallpaper "$state"
         echo "$timestamp;$state" >> "$LOG_FILE"
     fi
 }
