@@ -1,12 +1,20 @@
+# zmodload zsh/zprof
+
 autoload -Uz compinit
 zmodload zsh/complist
 autoload -U run-help
 
-if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
-  compinit
+_zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
+if [[ -n "$_zcompdump"(#qN.mh+24) ]]; then
+  compinit -d "$_zcompdump"
+  touch "$_zcompdump"
 else
-  compinit -C
+  compinit -C -d "$_zcompdump"
 fi
+if [[ -s "$_zcompdump" && ( ! -s "${_zcompdump}.zwc" || "$_zcompdump" -nt "${_zcompdump}.zwc" ) ]]; then
+  zcompile "$_zcompdump"
+fi
+unset _zcompdump
 
 source "${(%):-%x}.env"
 
@@ -186,7 +194,7 @@ function smaller () {
   echo "Choose output resolution [default: 2]:"
   echo "1) 720p"
   echo "2) 1080p"
-  
+
   local RES_CHOICE
   read -r "RES_CHOICE?Enter 1 or 2: " < /dev/tty
   RES_CHOICE=${RES_CHOICE:-2}
@@ -222,7 +230,7 @@ function smaller_av1 () {
   echo "Choose output resolution [default: 2]:"
   echo "1) 720p"
   echo "2) 1080p"
-  
+
   local RES_CHOICE
   read -r "RES_CHOICE?Enter 1 or 2: " < /dev/tty
   RES_CHOICE=${RES_CHOICE:-2}
@@ -264,7 +272,7 @@ function smaller_265 () {
   echo "Choose output resolution [default: 2]:"
   echo "1) 720p"
   echo "2) 1080p"
-  
+
   local RES_CHOICE
   read -r "RES_CHOICE?Enter 1 or 2: " < /dev/tty
   RES_CHOICE=${RES_CHOICE:-2}
@@ -278,10 +286,10 @@ function smaller_265 () {
     exit 1
   fi
 
-  OUTPUT="${NAME}_${HEIGHT}p24.mp4"
+  OUTPUT="${NAME}_${HEIGHT}p30.mp4"
 
   ffmpeg -i "$INPUT" \
-  -vf "scale=-2:${HEIGHT},fps=24" \
+  -vf "scale=-2:${HEIGHT},fps=30" \
   -c:v hevc_nvenc \
   -preset p5 \
   -cq 34 -b:v 0 \
@@ -343,9 +351,9 @@ function update-grub () {
 
 function g () {
     git "$@" || exit 1
-    
+
     local repoFolder=""
-    
+
     case "$1" in
         clone)
             local lastArg="${!#}"
@@ -370,24 +378,24 @@ function g () {
             fi
             ;;
     esac
-    
+
     __update_projects "$repoFolder"
 }
 
 function __update_projects () {
     local p="$1"
-    
+
     [[ -z "$p" ]] && return
-    
+
     local shouldUpdate=false
-    
+
     if [[ "$p" == $WORK_REPOS_PATH/* ]]; then
         shouldUpdate=true
     else
         read "REPLY?Add '$p' to projects.txt? (Y/n): "
-        
+
         [[ -z "$REPLY" ]] && REPLY="y"
-        
+
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             if ! grep -Fxq "$p" "$additionalProjectsFilePath"; then
                 echo "$p" >> "$additionalProjectsFilePath"
@@ -398,7 +406,7 @@ function __update_projects () {
             fi
         fi
     fi
-    
+
     if [[ "$shouldUpdate" == true ]]; then
        code-update-projects-silent
     fi
@@ -467,8 +475,6 @@ npx() {
   command npx "$@"
 }
 
-eval "$(zoxide init zsh)"
-
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
 autoload -Uz vcs_info
@@ -484,7 +490,7 @@ zstyle ':vcs_info:git:*' actionformats ' %F{76}%b|%a%f%c%u'
 
 precmd() {
   local last_status=$?
-  
+
   vcs_info
 
   [[ $PWD == $HOME ]] && PROMPT_PATH='' || PROMPT_PATH='%F{31}%~%f'
@@ -498,3 +504,5 @@ precmd() {
 
 PROMPT='${PROMPT_PATH}${vcs_info_msg_0_}${PROMPT_GAP}${PROMPT_CHAR} '
 
+eval "$(zoxide init zsh)"
+# zprof

@@ -23,6 +23,7 @@ function handle_ms_hiding_links () {
 
 function check_blocked_and_open () {
     local args="$*"
+    # if printf '%s' "$args" | grep -EF -f "$WORKSPACE/blocklist" -q; then
     if printf '%s' "$args" | grep -F -f "$WORKSPACE/blocklist" -q; then
         open_blocked_browser "$@"
         exit
@@ -82,9 +83,15 @@ function open_default_browser () {
     exit
 }
 
+function auto_focus_enabled () {
+    # shared "auto focus" toggle, flipped from the hypr tools submap (f)
+    [[ "$(cat "${XDG_RUNTIME_DIR:-/tmp}/hypr-autofocus" 2>/dev/null)" != "0" ]]
+}
+
 function move_to_workspace () {
     local workspace=$1
     local url=$2
+    auto_focus_enabled || return # disabled: stay on current workspace
     if [[ ! "$url" == *--app* ]]; then # only change workspace if not webapp
         hyprctl dispatch 'hl.dsp.focus({ workspace = '$workspace'})' > /dev/null 2>&1
     fi
@@ -95,7 +102,7 @@ function check_steam_and_open () {
     if pgrep -u "$USER" -x "steam" > /dev/null && printf '%s' "$args" | grep -E '(store\.steampowered)' -q; then
         appid=$(echo "$args" | grep -oP '(?<=/app/)[0-9]+')
         if [ -n "$appid" ]; then
-            hyprctl dispatch 'hl.dsp.focus({ workspace = 5})' > /dev/null 2>&1
+            auto_focus_enabled && hyprctl dispatch 'hl.dsp.focus({ workspace = 5})' > /dev/null 2>&1
             steam "steam://store/$appid" & disown
             exit
         fi

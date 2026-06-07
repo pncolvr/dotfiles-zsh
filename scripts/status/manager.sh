@@ -64,7 +64,7 @@ function notify() {
 
 function change_wallpaper() {
     local mode="$1"
-    "$HOME"/.config/hypr/scripts/wallpapers/default.sh "$mode"
+    setsid "$HOME"/.config/hypr/scripts/wallpapers/default.sh "$mode"
 }
 
 function log_state() {
