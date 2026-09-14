@@ -122,16 +122,39 @@ function collect_project_directories() {
     printf '%s\n' "${project_dirs[@]}"
 }
 
+function get_ssh_hostname_from_config() {
+    local host="$1"
+    case "$host" in
+        github-personal|github-work)
+            echo "github.com"
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+}
+
 function convert_to_https_url() {
     local git_url="$1"
-    
-    if [[ "$git_url" =~ ^git@([^:]+):(.+)\.git$ ]]; then
-        echo "https://${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
-    elif [[ "$git_url" =~ ^git@([^:]+):(.+)$ ]]; then
-        echo "https://${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+    local host
+    local path
+    local resolved_host
+    local normalized_url
+
+    if [[ "$git_url" =~ ^((git@)([^:/]+)(:|/))(.+)$ ]]; then
+        host="${BASH_REMATCH[3]}"
+        path="${BASH_REMATCH[5]}"
+        resolved_host=$(get_ssh_hostname_from_config "$host")
+        if [[ -n "$resolved_host" ]]; then
+            host="$resolved_host"
+        fi
+        normalized_url="https://${host}/${path}"
     else
-        echo "${git_url%.git}"
+        normalized_url="${git_url}"
     fi
+
+    normalized_url="${normalized_url%.git}"
+    echo "$normalized_url"
 }
 
 function get_git_remote_url() {
@@ -239,7 +262,7 @@ function process_projects_parallel() {
         exit 1
     fi
     
-    export -f find_project_workspaces get_git_remote_url get_project_category convert_to_https_url debug_log
+    export -f find_project_workspaces get_git_remote_url get_project_category convert_to_https_url get_ssh_hostname_from_config debug_log
     export VERBOSE
     export WORK_GIT_URL_MATCH WORK_PROJECTS_ROOT PROJECT_CATEGORY_WORK PROJECT_CATEGORY_PERSONAL
     
