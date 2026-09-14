@@ -31,7 +31,7 @@ function check_processes() {
 }
 
 function has_open_files_in_folder() {
-    lsof -u "$USER" 2>/dev/null | grep -q "$WORK_BASE_DIRECTORY"
+    lsof -n -u "$USER" 2>/dev/null | grep -q "$WORK_BASE_DIRECTORY"
 }
 
 function get_state() {
