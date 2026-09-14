@@ -211,7 +211,7 @@ function smaller () {
   OUTPUT="${NAME}_${HEIGHT}p30.mp4"
 
   ffmpeg -i "$INPUT" -vf "scale=-2:${HEIGHT},fps=30" \
-    -c:v h264_nvenc -preset fast -rc:v vbr_hq -cq:v 19 -b:v 0 \
+    -c:v h264_nvenc -preset fast -rc:v vbr -cq:v 19 -b:v 0 \
     -c:a aac -b:a 128k "$OUTPUT"
 
   echo "Conversion complete: $OUTPUT"
@@ -506,3 +506,5 @@ PROMPT='${PROMPT_PATH}${vcs_info_msg_0_}${PROMPT_GAP}${PROMPT_CHAR} '
 
 eval "$(zoxide init zsh)"
 # zprof
+# Added by ProtonUp-Qt on 22-06-2026 13:43:25
+if [ -d "/home/pncolvr/stl/prefix" ]; then export PATH="$PATH:/home/pncolvr/stl/prefix"; fi
