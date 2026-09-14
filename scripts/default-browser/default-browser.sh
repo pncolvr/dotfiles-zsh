@@ -9,12 +9,15 @@ source "$env"
 function handle_ms_hiding_links () {
     local url="$*"
     local new
+    local encoded_url
     if [[ "$url" == *"aka.ms"* ]]; then
         new=$(curl -s -o /dev/null -w "%{url_effective}" -L "$url")
-    elif [[ "$url" == *"statics.teams.cdn.office.net"* ]] ;then
-        new=$(printf '%b\n' "$(echo "$url" | sed -n 's/.*[?&]url=\([^&]*\).*/\1/p' | sed 's/%/\\x/g')")
+    elif [[ "$url" == *"teams.public.onecdn.static.microsoft"* && "$url" == *"/evergreen-assets/safelinks/2/atp-safelinks.html"* ]] || [[ "$url" == *"statics.teams.cdn.office.net"* ]]; then
+        encoded_url=$(printf '%s' "$url" | sed -n 's#.*[?&]url=\([^&]*\).*#\1#p')
+        if [[ -n "$encoded_url" ]]; then
+            new=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.argv[1]))' "$encoded_url")
+        fi
     fi
-
     if [[ -n "$new" ]]; then
         log "resolving to $new"
         main "$new"
