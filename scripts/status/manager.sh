@@ -59,7 +59,7 @@ function calc_state_from_heuristics() {
 
 function notify() {
     local status="$1"
-    hyprctl notify -1 1500 "rgb(6272a4)" "$status mode" > /dev/null 2>&1
+    hyprctl notify -1 1500 "rgb(6B8FB3)" "$status mode" > /dev/null 2>&1
 }
 
 function change_wallpaper() {
