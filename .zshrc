@@ -224,75 +224,8 @@ function backup() {
   sudo ZDOTDIR="$ZDOTDIR" "$SCRIPTS"/backups/host/create.sh backup
 }
 
-function code-update-projects () {
-  $SCRIPTS/code/update-projects.sh
-}
-
 function update-grub () {
   sudo $SCRIPTS/grub/update.sh "$@"
-}
-
-function g () {
-    git "$@" || exit 1
-
-    local repoFolder=""
-
-    case "$1" in
-        clone)
-            local lastArg="${!#}"
-            if [[ ! "$lastArg" =~ ^- ]] && [[ $# -ge 3 ]]; then
-                repoFolder=$(realpath "$lastArg")
-            else
-                for arg in "$@"; do
-                    if [[ "$arg" =~ (https?://|git@|\.git$) ]]; then
-                        local repoName=$(basename "$arg" .git)
-                        repoFolder=$(realpath "$repoName")
-                        break
-                    fi
-                done
-            fi
-            ;;
-        init)
-            local lastArg="${!#}"
-            if [[ ! "$lastArg" =~ ^- ]] && [[ $# -ge 2 ]]; then
-                repoFolder=$(realpath "$lastArg")
-            else
-                repoFolder=$(realpath ".")
-            fi
-            ;;
-    esac
-
-    __update_projects "$repoFolder"
-}
-
-function __update_projects () {
-    local p="$1"
-
-    [[ -z "$p" ]] && return
-
-    local shouldUpdate=false
-
-    if [[ "$p" == $WORK_REPOS_PATH/* ]]; then
-        shouldUpdate=true
-    else
-        read "REPLY?Add '$p' to projects.txt? (Y/n): "
-
-        [[ -z "$REPLY" ]] && REPLY="y"
-
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            if ! grep -Fxq "$p" "$additionalProjectsFilePath"; then
-                echo "$p" >> "$additionalProjectsFilePath"
-                echo "Added $p to projects.txt"
-                shouldUpdate=true
-            else
-                echo "$p is already in projects.txt"
-            fi
-        fi
-    fi
-
-    if [[ "$shouldUpdate" == true ]]; then
-       code-update-projects-silent
-    fi
 }
 
 function br () {
