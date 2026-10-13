@@ -2,7 +2,7 @@
 
 source "$ZDOTDIR"/scripts/_common.sh
 env=$(get_env_file "${BASH_SOURCE[0]:-0}")
-source $env
+source "$env"
 
 # https://man7.org/linux/man-pages/man1/flock.1.html
 # LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/status-manager.lock"
@@ -31,7 +31,7 @@ function check_processes() {
 }
 
 function has_open_files_in_folder() {
-    lsof -n -u "$USER" 2>/dev/null | grep -q "$WORK_BASE_DIRECTORY"
+    bash "$(dirname -- "${BASH_SOURCE[0]}")/detection.sh" --has-work-files "${WORK_BASE_DIRECTORY:-}"
 }
 
 function get_state() {
@@ -140,6 +140,7 @@ function usage () {
     echo "  $0 --log-system-event    Logs a system event (eg: active or inactive)."
     echo "  $0 --toggle              Toggles the state, considered manually set."
     echo "  $0 --source              Returns either manual or automatic."
+    echo "  $0 --explain             Read automatic detection matches as JSON; does not change or log mode."
     echo "  $0 --clear               Clear the manual state override."
     echo "  $0 --help                Show this usage message."
 }
@@ -173,6 +174,9 @@ case "$1" in
         ;;
     --source)
         get_source
+        ;;
+    --explain)
+        bash "$(dirname -- "${BASH_SOURCE[0]}")/detection.sh" "$STATE_FILE" "${WORK_BASE_DIRECTORY:-}" "${WORKING_PROCESSES[@]}"
         ;;
     --clear)
         clear_state
