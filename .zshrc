@@ -178,7 +178,7 @@ function ae () {
 # }
 
 function cookie-jar () {
-  "$HOME"/.config/qutebrowser/scripts/cookie-cleaner.sh
+  "${XDG_DATA_HOME:-$HOME/.local/share}/qutebrowser/userscripts/cookie-cleaner.sh"
 }
 
 function smaller () {
