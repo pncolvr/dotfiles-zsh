@@ -109,8 +109,7 @@ alias cd='z'
 alias ff='fastfetch'
 alias neofetch='fastfetch'
 
-alias updatemirrors='rate-mirrors arch --max-delay=3600 | sudo tee /etc/pacman.d/mirrorlist && eos-rankmirrors'
-alias b='cat $HOME/.config/hypr/config.d/keybindings.conf | grep "^bind" | grep --invert-match "#" | fzf'
+alias updatemirrors='rate-mirrors arch --max-delay=3600 | sudo tee /etc/pacman.d/mirrorlist && eos-rankmirrors && sudo cachyos-rate-mirrors'
 
 function h {
   local value

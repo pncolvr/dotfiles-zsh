@@ -64,7 +64,11 @@ function notify() {
 
 function change_wallpaper() {
     local mode="$1"
-    setsid "$HOME"/.config/hypr/scripts/wallpapers/default.sh "$mode"
+    case "$mode" in
+        work|personal)
+            setsid bash "$HOME/.config/quickshell/src/services/launcher/launcher.sh" provider wallpaper restore "$mode"
+            ;;
+    esac
 }
 
 function log_state() {
