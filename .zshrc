@@ -137,14 +137,6 @@ alias azure-update-subs="/home/pncolvr/Projects/scripts/rofi/web/azure.sh --rebu
 # alias git-clean='git clean -fdx'
 # alias gtfo='git remote prune origin'
 
-function timecard() {
-  $ZDOTDIR/scripts/status/bin/timecard -f "$TIMETABLE_FILE" -d "$(date '+%Y-%m-%d')"
-}
-
-function timecard-all() {
-  $ZDOTDIR/scripts/status/bin/timecard -f "$TIMETABLE_FILE"
-}
-
 function config() {
   command git --git-dir="$HOME/.cfg" --work-tree="$HOME" "$@"
 }
