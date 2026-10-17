@@ -98,8 +98,8 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias mkdir='mkdir -p'
 
-alias extract='eval $SCRIPTS/archives/extract.sh'
-alias archive='eval $SCRIPTS/archives/create.sh -t'
+# alias extract='eval $SCRIPTS/archives/extract.sh'
+# alias archive='eval $SCRIPTS/archives/create.sh'
 
 alias bios='systemctl reboot --firmware-setup'
 
@@ -178,9 +178,9 @@ function cookie-jar () {
   "${XDG_DATA_HOME:-$HOME/.local/share}/qutebrowser/userscripts/cookie-cleaner.sh"
 }
 
-function smaller () {
-  "$SCRIPTS"/media/smaller.sh "$@"
-}
+# function smaller () {
+#   "$SCRIPTS"/media/smaller.sh "$@"
+# }
 
 function zip-with-password () {
   7z a -tzip -p"$1" -mem=AES256 "$1"
