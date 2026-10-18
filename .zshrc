@@ -128,7 +128,7 @@ function h {
 alias clear="clear && printf '\e[3J'"
 alias testmic="arecord -f cd | aplay"
 
-alias browser='$SCRIPTS/default-browser/default-browser.sh'
+alias browser='quickshell-browser'
 
 alias heph-ssh='ssh pncolvr@$HEPHAESTUS_IP'
 alias heph-ping='ping $HEPHAESTUS_IP'
@@ -217,6 +217,11 @@ function backup-n8n() {
   "$SCRIPTS"/backups/n8n/backup-workflows.sh
 }
 
+alias qs-backup='qs ipc call backup create "$PWD/backup-$(date +%Y%m%d).7z"'
+function qs-restore() {
+  qs ipc call backup restore "${1:A}"
+}
+
 function backup() {
   sudo ZDOTDIR="$ZDOTDIR" "$SCRIPTS"/backups/host/create.sh backup
 }
@@ -258,7 +263,6 @@ export PATH="$PATH:$HOME/.dotnet/tools"
 if [ -z "$WAYLAND_DISPLAY" ]; then
 	setxkbmap -layout us -variant intl
 fi
-
 
 _nvm_lazy_source() {
   source /usr/share/nvm/init-nvm.sh
@@ -319,8 +323,6 @@ PROMPT='${PROMPT_PATH}${vcs_info_msg_0_}${PROMPT_GAP}${PROMPT_CHAR} '
 
 eval "$(zoxide init zsh)"
 # zprof
-# Added by ProtonUp-Qt on 22-06-2026 13:43:25
-if [ -d "/home/pncolvr/stl/prefix" ]; then export PATH="$PATH:/home/pncolvr/stl/prefix"; fi
 
 # Initialize after global aliases, completions and directory hooks.
 source "${${(%):-%x}:A:h}/scripts/shell/project-shell.zsh"
