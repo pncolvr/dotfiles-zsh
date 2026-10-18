@@ -315,7 +315,7 @@ function _format_execution_time() {
   if (( milliseconds < 1000 )); then
     print -r -- "${milliseconds} ms"
   elif (( milliseconds < 60000 )); then
-    printf '%d.%03d s\n' "$(( milliseconds / 1000 ))" "$(( milliseconds % 1000 ))"
+    printf '%d.%03ds\n' "$(( milliseconds / 1000 ))" "$(( milliseconds % 1000 ))"
   elif (( milliseconds < 3600000 )); then
     minutes=$(( milliseconds / 60000 ))
     seconds=$(( milliseconds / 1000 % 60 ))
