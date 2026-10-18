@@ -300,6 +300,33 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 autoload -Uz vcs_info
 setopt prompt_subst
 setopt inc_append_history_time
+zmodload zsh/datetime
+
+typeset -g _command_started_at=''
+
+preexec() {
+  _command_started_at=$EPOCHREALTIME
+}
+
+function _format_execution_time() {
+  local milliseconds=$1
+  local seconds minutes hours
+
+  if (( milliseconds < 1000 )); then
+    print -r -- "${milliseconds} ms"
+  elif (( milliseconds < 60000 )); then
+    printf '%d.%03d s\n' "$(( milliseconds / 1000 ))" "$(( milliseconds % 1000 ))"
+  elif (( milliseconds < 3600000 )); then
+    minutes=$(( milliseconds / 60000 ))
+    seconds=$(( milliseconds / 1000 % 60 ))
+    print -r -- "${minutes}m ${seconds}s"
+  else
+    hours=$(( milliseconds / 3600000 ))
+    minutes=$(( milliseconds / 60000 % 60 ))
+    seconds=$(( milliseconds / 1000 % 60 ))
+    print -r -- "${hours}h ${minutes}m ${seconds}s"
+  fi
+}
 
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' check-for-changes false
@@ -310,6 +337,13 @@ zstyle ':vcs_info:git:*' actionformats ' %F{green}%b|%a%f%c%u'
 
 precmd() {
   local last_status=$?
+
+  if [[ -n "$_command_started_at" ]]; then
+    local -i elapsed_ms=$(( (EPOCHREALTIME - _command_started_at) * 1000 ))
+    local execution_time=$(_format_execution_time "$elapsed_ms")
+    _command_started_at=''
+    print -P -- "%B%F{8}${execution_time}%f%b"
+  fi
 
   vcs_info
 
