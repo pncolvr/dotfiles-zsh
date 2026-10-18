@@ -256,6 +256,9 @@ DISABLE_AUTO_TITLE="false"
 # shellcheck disable=SC1094
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+# Give recognized commands the same weight as unknown commands.
+ZSH_HIGHLIGHT_STYLES[arg0]='fg=green,bold'
+
 export PATH="$PATH:/home/pncolvr/.local/bin"
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$PATH:$HOME/.dotnet/tools"
@@ -302,20 +305,20 @@ zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' check-for-changes false
 zstyle ':vcs_info:git:*' stagedstr '+'
 zstyle ':vcs_info:git:*' unstagedstr '!'
-zstyle ':vcs_info:git:*' formats ' %F{76}%b%f%c%u'
-zstyle ':vcs_info:git:*' actionformats ' %F{76}%b|%a%f%c%u'
+zstyle ':vcs_info:git:*' formats ' %F{green}%b%f%c%u'
+zstyle ':vcs_info:git:*' actionformats ' %F{green}%b|%a%f%c%u'
 
 precmd() {
   local last_status=$?
 
   vcs_info
 
-  [[ $PWD == $HOME ]] && PROMPT_PATH='' || PROMPT_PATH='%F{31}%~%f'
+  [[ $PWD == $HOME ]] && PROMPT_PATH='' || PROMPT_PATH='%F{cyan}%~%f'
   [[ -n "$PROMPT_PATH" || -n "$vcs_info_msg_0_" ]] && PROMPT_GAP=' ' || PROMPT_GAP=''
   if (( last_status == 0 )); then
-    PROMPT_CHAR='%F{76}❯%f'
+    PROMPT_CHAR='%F{green}❯%f'
   else
-    PROMPT_CHAR='%F{196}❯%f'
+    PROMPT_CHAR='%F{red}❯%f'
   fi
 }
 
