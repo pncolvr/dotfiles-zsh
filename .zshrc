@@ -303,9 +303,20 @@ setopt inc_append_history_time
 zmodload zsh/datetime
 
 typeset -g _command_started_at=''
+typeset -g _command_line=''
+
+# first word of commands that should never print a duration
+typeset -ga _timer_ignore=(
+  clear
+  # clear reset cd z ls ll pwd exit fg bg jobs history h
+  # nvim vim less man ssh heph-ssh htop btop fzf ff fastfetch open code
+)
+# only print if it took at least this long, in ms (0 = always print)
+typeset -gi _timer_min_ms=0
 
 preexec() {
   _command_started_at=$EPOCHREALTIME
+  _command_line=$1
 }
 
 function _format_execution_time() {
@@ -340,11 +351,17 @@ precmd() {
 
   if [[ -n "$_command_started_at" ]]; then
     local -i elapsed_ms=$(( (EPOCHREALTIME - _command_started_at) * 1000 ))
-    local execution_time=$(_format_execution_time "$elapsed_ms")
+    local -a words=( ${(z)_command_line} )
+    [[ ${words[1]} == sudo ]] && shift words
+    local cmd=${words[1]}
     _command_started_at=''
-    print -P -- "%B%F{8}${execution_time}%f%b"
-  fi
+    _command_line=''
 
+    if (( elapsed_ms >= _timer_min_ms )) && (( ! ${_timer_ignore[(Ie)$cmd]} )); then
+      local execution_time=$(_format_execution_time "$elapsed_ms")
+      print -P -- "%B%F{8}${execution_time}%f%b"
+    fi
+  fi
   vcs_info
 
   [[ $PWD == $HOME ]] && PROMPT_PATH='' || PROMPT_PATH='%F{cyan}%~%f'
