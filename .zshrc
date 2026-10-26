@@ -300,18 +300,20 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 autoload -Uz vcs_info
 setopt prompt_subst
 setopt inc_append_history_time
+setopt transient_rprompt   # remove the right prompt after pressing Enter
 zmodload zsh/datetime
 
 typeset -g _command_started_at=''
 typeset -g _command_line=''
+typeset -g _exec_time=''
 
-# first word of commands that should never print a duration
+# first word of commands that should never show a duration
 typeset -ga _timer_ignore=(
   clear
   # clear reset cd z ls ll pwd exit fg bg jobs history h
   # nvim vim less man ssh heph-ssh htop btop fzf ff fastfetch open code
 )
-# only print if it took at least this long, in ms (0 = always print)
+# only show if it took at least this long, in ms (0 = always show)
 typeset -gi _timer_min_ms=0
 
 preexec() {
@@ -348,6 +350,7 @@ zstyle ':vcs_info:git:*' actionformats ' %F{green}%b|%a%f%c%u'
 
 precmd() {
   local last_status=$?
+  _exec_time=''
 
   if [[ -n "$_command_started_at" ]]; then
     local -i elapsed_ms=$(( (EPOCHREALTIME - _command_started_at) * 1000 ))
@@ -358,8 +361,7 @@ precmd() {
     _command_line=''
 
     if (( elapsed_ms >= _timer_min_ms )) && (( ! ${_timer_ignore[(Ie)$cmd]} )); then
-      local execution_time=$(_format_execution_time "$elapsed_ms")
-      print -P -- "%B%F{8}${execution_time}%f%b"
+      _exec_time=$(_format_execution_time "$elapsed_ms")
     fi
   fi
   vcs_info
@@ -374,6 +376,7 @@ precmd() {
 }
 
 PROMPT='${PROMPT_PATH}${vcs_info_msg_0_}${PROMPT_GAP}${PROMPT_CHAR} '
+RPROMPT='%B%F{8}${_exec_time}%f%b'
 
 eval "$(zoxide init zsh)"
 # zprof
