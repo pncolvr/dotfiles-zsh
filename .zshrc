@@ -40,6 +40,28 @@ bindkey '^[[1;5D' backward-word # ctrl + left arrow
 bindkey '^[[1;5C' forward-word  # ctrl + right arrow
 bindkey '^[[H' beginning-of-line  # home key
 bindkey '^[[F' end-of-line  # end key
+bindkey '^A' beginning-of-line # ctrl + a
+bindkey '^E' end-of-line # ctrl + e
+bindkey '^W' backward-kill-word # ctrl + w (not limited to the insert start like vi-backward-kill-word)
+bindkey '^[.' insert-last-word # alt + . (repeat to cycle through previous commands' last args)
+bindkey '^U' backward-kill-line # ctrl + u (cut from cursor to line start into the kill ring)
+bindkey '^Y' yank # ctrl + y (paste the last cut text back)
+
+# list the custom keybinds defined in this file: description, keymap and widget
+function keybinds() {
+  local line desc keymap
+  local -a words
+  while IFS= read -r line; do
+    [[ $line == *'#'* ]] && desc="${line#*\# }" || desc=""
+    words=(${(Q)${(z)line%%\#*}})
+    keymap="main"
+    if [[ ${words[2]} == "-M" ]]; then
+      keymap=${words[3]}
+      words=(${words[1]} ${words[4,-1]})
+    fi
+    printf '%-36s \e[2m%-10s\e[0m %s\n' "${words[3]}" "$keymap" "${desc:-${words[2]}}"
+  done < <(grep -E '^[[:space:]]*bindkey ' "$ZDOTDIR/.zshrc")
+}
 
 function _zle_paste_clipboard() {
   local clip=""
