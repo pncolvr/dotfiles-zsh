@@ -248,6 +248,19 @@ function backup() {
   sudo ZDOTDIR="$ZDOTDIR" "$SCRIPTS"/backups/host/create.sh backup
 }
 
+function backup-browse() {
+  "$SCRIPTS"/backups/host/create.sh browse
+}
+
+function backup-eject() {
+  "$SCRIPTS"/backups/host/create.sh eject
+}
+
+# clean-projects [-n] [-y] [dir]: delete build output and dependencies (default dir: ~/Projects)
+function clean-projects() {
+  "$SCRIPTS"/projects/clean.sh "$@"
+}
+
 function update-grub () {
   sudo $SCRIPTS/grub/update.sh "$@"
 }
