@@ -245,6 +245,7 @@ function qs-restore() {
 }
 
 function backup() {
+  print -P "%F{yellow}Reminder:%f create a Quickshell backup first: %Bqs-backup%b (saves ./backup-YYYYMMDD.7z)"
   sudo ZDOTDIR="$ZDOTDIR" "$SCRIPTS"/backups/host/create.sh backup
 }
 
