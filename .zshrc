@@ -287,6 +287,166 @@ function __open_with() {
   "$1" "$path" 1>/dev/null 2>/dev/null & disown
 }
 
+
+function git-change-host() {
+    emulate -L zsh
+    setopt pipefail
+
+    local new_remote="$1"
+    local base_dir="${2:-.}"
+
+    if [[ -z "$new_remote" ]]; then
+        echo "Usage: git-change-host <new-hostname> [folder]"
+        return 1
+    fi
+
+    if [[ "$new_remote" == *[!a-zA-Z0-9.-]* ]]; then
+        echo "Invalid hostname: $new_remote"
+        return 1
+    fi
+
+    local -a repos remotes old_urls new_urls selected
+    local repo git_dir remote old_url new_url
+    local answer item i count=0 selected_count=0
+
+    echo "Searching Git repositories in: $base_dir"
+
+    while IFS= read -r -d '' git_dir; do
+        repo="${git_dir%/.git}"
+
+        while IFS= read -r remote; do
+            [[ -z "$remote" ]] && continue
+
+            old_url=$(git -C "$repo" remote get-url "$remote") || continue
+
+            # HTTPS / SSH URLs
+            new_url=$(NEW_REMOTE="$new_remote" perl -pe '
+                s{^([a-zA-Z][a-zA-Z0-9+.-]*://)(?:([^/@]+)@)?([^/:]+)(:\d+)?(/.*)?$}{
+                    $1 . (defined $2 ? "$2@" : "") .
+                    $ENV{NEW_REMOTE} .
+                    (defined $4 ? $4 : "") .
+                    (defined $5 ? $5 : "")
+                }e;
+
+                # SCP-style SSH URLs: git@host:path
+                if (!m{://}) {
+                    s{^([^/@]+)@([^:]+):(.*)$}{
+                        "$1@" . $ENV{NEW_REMOTE} . ":$3"
+                    }e;
+                }
+            ' <<< "$old_url")
+
+            [[ "$old_url" == "$new_url" ]] && continue
+
+            (( count++ ))
+
+            repos[$count]="$repo"
+            remotes[$count]="$remote"
+            old_urls[$count]="$old_url"
+            new_urls[$count]="$new_url"
+            selected[$count]=1
+
+        done < <(git -C "$repo" remote 2>/dev/null)
+
+    done < <(find "$base_dir" -type d -name .git -prune -print0)
+
+    if (( count == 0 )); then
+        echo "No remote URLs need changing."
+        return 0
+    fi
+
+    # Interactive selection
+    while true; do
+        echo
+        echo "Proposed changes (all selected by default):"
+        echo
+
+        selected_count=0
+
+        for (( i=1; i<=count; i++ )); do
+            if (( selected[i] )); then
+                echo "[$i] [x] ${repos[i]} (${remotes[i]})"
+                (( selected_count++ ))
+            else
+                echo "[$i] [ ] ${repos[i]} (${remotes[i]})"
+            fi
+
+            echo "      OLD: ${old_urls[i]}"
+            echo "      NEW: ${new_urls[i]}"
+            echo
+        done
+
+        echo "Selected: $selected_count / $count"
+        echo
+        echo "Enter numbers to toggle (e.g. 1 3)"
+        echo "a = select all | n = select none | q = quit"
+        echo "Press ENTER to continue with selection."
+
+        read "answer?Selection: "
+
+        [[ -z "$answer" ]] && break
+
+        case "$answer" in
+            q|Q)
+                echo "Cancelled. No changes made."
+                return 0
+                ;;
+            a|A)
+                for (( i=1; i<=count; i++ )); do
+                    selected[$i]=1
+                done
+                continue
+                ;;
+            n|N)
+                for (( i=1; i<=count; i++ )); do
+                    selected[$i]=0
+                done
+                continue
+                ;;
+        esac
+
+        for item in ${(z)answer}; do
+            if [[ "$item" == <-> ]] &&
+               (( item >= 1 && item <= count )); then
+                selected[$item]=$(( 1 - selected[$item] ))
+            else
+                echo "Invalid selection: $item"
+            fi
+        done
+    done
+
+    if (( selected_count == 0 )); then
+        echo "Nothing selected. No changes made."
+        return 0
+    fi
+
+    echo
+    echo "About to update $selected_count remote(s)."
+    read "answer?Proceed? [y/N] "
+
+    if [[ "$answer" != [yY] ]]; then
+        echo "Cancelled. No changes made."
+        return 0
+    fi
+
+    # Apply selected changes
+    echo
+    for (( i=1; i<=count; i++ )); do
+        (( selected[i] )) || continue
+
+        if git -C "${repos[i]}" remote set-url \
+            "${remotes[i]}" "${new_urls[i]}"; then
+            echo "Updated: ${repos[i]} (${remotes[i]})"
+        else
+            echo "ERROR: ${repos[i]} (${remotes[i]})"
+        fi
+    done
+
+    echo
+    echo "Finished."
+}
+
+
 DISABLE_AUTO_TITLE="false"
 
 # shellcheck disable=SC1094
