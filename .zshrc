@@ -204,10 +204,6 @@ function cookie-jar () {
 #   "$SCRIPTS"/media/smaller.sh "$@"
 # }
 
-function zip-with-password () {
-  7z a -tzip -p"$1" -mem=AES256 "$1"
-}
-
 function uc() {
   exec-script "$SCRIPTS/git/sync-projects.sh"
 }
