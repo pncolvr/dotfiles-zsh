@@ -111,6 +111,7 @@ export FILE_BROWSER='pcmanfm-qt'
 
 NAS_FOLDER='/mnt/hephaestus'
 SCRIPTS="$ZDOTDIR/scripts"
+source "$SCRIPTS/docker/clean.zsh"
 HEPHAESTUS_IP='192.168.1.3'
 
 alias ls='ls --human-readable --color=always --group-directories-first --time-style="+%Y-%m-%d %H:%M:%S"'
@@ -491,6 +492,7 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
 autoload -Uz vcs_info
 setopt prompt_subst
+setopt interactive_comments   # allow '# comments' when typing/pasting commands
 setopt inc_append_history_time
 setopt transient_rprompt   # remove the right prompt after pressing Enter
 zmodload zsh/datetime
