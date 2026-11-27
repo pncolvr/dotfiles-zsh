@@ -232,10 +232,6 @@ function birth(){
   stat / | grep "Birth" | sed 's/Birth: //g' | cut -b 2-20
 }
 
-function backup-n8n() {
-  "$SCRIPTS"/backups/n8n/backup-workflows.sh
-}
-
 alias qs-backup='qs ipc call backup create "$PWD/backup-$(date +%Y%m%d).7z"'
 function qs-restore() {
   qs ipc call backup restore "${1:A}"
